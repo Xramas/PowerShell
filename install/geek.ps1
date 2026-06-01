@@ -98,9 +98,9 @@ if (Test-Path $expectedExePath) {
 }
 
 # =================================================================
-# 7. 创建桌面快捷方式
+# 7. 创建桌面快捷方式 (显式指定图标路径，解决空白图标问题)
 # =================================================================
-Write-Host "Creating desktop shortcut..." -ForegroundColor Cyan
+Write-Host "Creating desktop shortcut with icon alignment..." -ForegroundColor Cyan
 try {
     $desktopPath = [Environment]::GetFolderPath("Desktop")
     $shortcutPath = Join-Path $desktopPath "Geek.lnk"
@@ -110,15 +110,18 @@ try {
     $shortcut.TargetPath = $newExePath
     $shortcut.WorkingDirectory = $targetDir
     $shortcut.Description = "Geek Uninstaller - Portable Software Remover"
-    $shortcut.Save()
     
-    Write-Host "Shortcut 'Geek' created on Desktop successfully!" -ForegroundColor Green
+    # 🌟 核心修复：显式强制 Windows 提取 Geek.exe 内部的第一个图标(索引为0)
+    $shortcut.IconLocation = "$newExePath, 0"
+    
+    $shortcut.Save()
+    Write-Host "Shortcut 'Geek' created on Desktop with correct icon!" -ForegroundColor Green
 } catch {
     Write-Error "Error: Failed to create shortcut. Details: $_"
-} finally {
-    # =================================================================
-    # 8. 清理临时压缩包
-    # =================================================================
+}
+# =================================================================
+# 8. 清理临时压缩包
+# =================================================================
     if (Test-Path $zipPath) {
         Remove-Item $zipPath -Force
         Write-Host "Temporary zip package cleared." -ForegroundColor Gray
