@@ -1,10 +1,9 @@
 # =================================================================
-# 1. 网络协议支持
+# 1. 网络协议支持 (使用数字掩码，完美兼容老系统，防止枚举报错)
 # =================================================================
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor 
-                                              [Net.SecurityProtocolType]::Tls11 -bor 
-                                              [Net.SecurityProtocolType]::Tls12 -bor 
-                                              [Net.SecurityProtocolType]::Tls13
+try {
+    [Net.ServicePointManager]::SecurityProtocol = 192 -bor 768 -bor 3072 -bor 12288
+} catch {}
 
 # =================================================================
 # 2. 构建候选下载链接（官方直链 + 预留自建通用代理接口）
@@ -89,7 +88,6 @@ if (Test-Path $expectedExePath) {
             Write-Error "Error: Failed to rename executable. Details: $_"
         }
     } else {
-        # 如果已经是大写 Geek.exe，直接跳过，皆大欢喜
         Write-Host "Executable is already capitalized as Geek.exe. No rename needed." -ForegroundColor Green
     }
 } else {
@@ -107,23 +105,25 @@ try {
     
     $wshShell = New-Object -ComObject WScript.Shell
     $shortcut = $wshShell.CreateShortcut($shortcutPath)
-    $shortcut.TargetPath = $newExePath
+    
+    # 🌟 修复点：将未定义的 $newExePath 统一替换为上面定义好的 $expectedExePath
+    $shortcut.TargetPath = $expectedExePath
     $shortcut.WorkingDirectory = $targetDir
     $shortcut.Description = "Geek Uninstaller - Portable Software Remover"
     
-    # 🌟 核心修复：显式强制 Windows 提取 Geek.exe 内部的第一个图标(索引为0)
-    $shortcut.IconLocation = "$newExePath, 0"
+    # 🌟 修复点：强制指定正确的图标路径变量
+    $shortcut.IconLocation = "$expectedExePath, 0"
     
     $shortcut.Save()
     Write-Host "Shortcut 'Geek' created on Desktop with correct icon!" -ForegroundColor Green
 } catch {
     Write-Error "Error: Failed to create shortcut. Details: $_"
 }
+
 # =================================================================
 # 8. 清理临时压缩包
 # =================================================================
-    if (Test-Path $zipPath) {
-        Remove-Item $zipPath -Force
-        Write-Host "Temporary zip package cleared." -ForegroundColor Gray
-    }
+if (Test-Path $zipPath) {
+    Remove-Item $zipPath -Force
+    Write-Host "Temporary zip package cleared." -ForegroundColor Gray
 }
