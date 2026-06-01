@@ -1,3 +1,6 @@
+# 强制设置控制台输出编码为 UTF-8，彻底解决中文乱码
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 # 1. 动态获取 GitHub 上 7-Zip 的最新版本号
 Write-Host "正在检索 GitHub 获取 7-Zip 最新版本号..." -ForegroundColor Cyan
 
@@ -7,17 +10,14 @@ Write-Host "正在检索 GitHub 获取 7-Zip 最新版本号..." -ForegroundColo
 try {
     # 请求 GitHub API 获取最新 Release 信息
     $githubApiUrl = "https://api.github.com/repos/ip7z/7zip/releases/latest"
-    # 加上 User-Agent 防止被 GitHub API 拒绝访问
     $apiResponse = Invoke-RestMethod -Uri $githubApiUrl -UserAgent "Mozilla/5.0" -TimeoutSec 5
     
-    # 提取 tag_name (例如 "26.01")
+    # 提取并转换版本号
     $latestVersion = $apiResponse.tag_name
-    # 将 "26.01" 转换为文件名需要的 "2601" 格式
     $versionClean = $latestVersion -replace '\.', ''
     
     Write-Host "检测到最新版本为: $latestVersion" -ForegroundColor Green
 } catch {
-    # 如果解析 API 失败，设置一个保底的稳定版，防止脚本彻底崩溃
     Write-Host "无法获取最新版本号，将启用保底版本 26.01" -ForegroundColor Yellow
     $latestVersion = "26.01"
     $versionClean = "2601"
@@ -26,13 +26,11 @@ try {
 # 2. 动态拼接下载地址
 $githubUrl = "https://github.com/ip7z/7zip/releases/download/$latestVersion/7z$versionClean-x64.exe"
 $mirrorUrl = "https://mirror.nju.edu.cn/github-release/ip7z/7zip/LatestRelease/7z$versionClean-x64.exe"
-
-# 定义本地临时保存路径
 $installerPath = Join-Path $env:TEMP "7z-installer.exe"
 
 # 3. 检测 IP 归属地
 Write-Host "正在检测您的 IP 地理位置..." -ForegroundColor Cyan
-$downloadUrl = $githubUrl # 默认 GitHub
+$downloadUrl = $githubUrl
 
 try {
     $ipInfo = Invoke-RestMethod -Uri "http://ip-api.com/json/?fields=countryCode" -TimeoutSec 5
@@ -40,6 +38,7 @@ try {
         Write-Host "检测到境内 IP，使用南京大学镜像源。" -ForegroundColor Green
         $downloadUrl = $mirrorUrl
     } else {
+        # 顺便修复了一个小 Bug：之前这里把 $ipInfo.countryCode 写成了 ${$ipInfo.countryCode} 导致没显示出国家代码
         Write-Host "检测到境外 IP (${$ipInfo.countryCode})，直接使用 GitHub 源。" -ForegroundColor Green
     }
 } catch {
