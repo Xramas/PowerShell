@@ -72,21 +72,29 @@ try {
 }
 
 # =================================================================
-# 6. 重命名可执行文件 (将小写 geek.exe 重命名为大写 Geek.exe)
+# 6. 重命名可执行文件 (严格区分大小写检查)
 # =================================================================
-$oldExePath = Join-Path $targetDir "geek.exe"
-$newExePath = Join-Path $targetDir "Geek.exe"
+$expectedExePath = Join-Path $targetDir "Geek.exe"
+$oldExePath      = Join-Path $targetDir "geek.exe"
 
-if (Test-Path $oldExePath) {
-    try {
-        if (Test-Path $newExePath) {
-            Remove-Item $newExePath -Force
+if (Test-Path $expectedExePath) {
+    # 获取文件系统中的实际文件名（严格区分大小写）
+    $actualName = (Get-Item $expectedExePath).Name
+    
+    if ($actualName -eq "geek.exe") {
+        try {
+            Rename-Item -Path $oldExePath -NewName "Geek.exe" -Force
+            Write-Host "Renamed executable to Geek.exe successfully." -ForegroundColor Green
+        } catch {
+            Write-Error "Error: Failed to rename executable. Details: $_"
         }
-        Rename-Item -Path $oldExePath -NewName "Geek.exe" -Force
-        Write-Host "Renamed executable to Geek.exe successfully." -ForegroundColor Green
-    } catch {
-        Write-Error "Error: Failed to rename executable. Details: $_"
+    } else {
+        # 如果已经是大写 Geek.exe，直接跳过，皆大欢喜
+        Write-Host "Executable is already capitalized as Geek.exe. No rename needed." -ForegroundColor Green
     }
+} else {
+    Write-Error "Error: Cannot find Geek executable in target directory."
+    exit 1
 }
 
 # =================================================================
