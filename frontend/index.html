@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0">
     <title>fucker.li</title>
     
     <!-- 精确配置 SVG 与 PNG 图标 -->
@@ -49,6 +49,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent; /* 消除移动端点击蓝色高亮 */
         }
 
         body {
@@ -60,26 +61,28 @@
             justify-content: space-between;
             align-items: center;
             min-height: 100vh;
-            padding: 40px 20px;
+            padding: 40px 24px;
             transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
         }
 
-        /* 极简顶栏（文本链接形式的配置菜单） */
+        /* 极简顶栏（PC 端单行横排） */
         header {
             width: 100%;
             max-width: 680px;
             display: flex;
             justify-content: flex-end;
-            gap: 20px;
+            align-items: center;
+            gap: 16px;
             font-size: 13px;
             font-family: var(--font-mono);
             color: var(--text-muted);
+            flex-wrap: wrap;
         }
 
         .menu-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .menu-btn {
@@ -90,7 +93,7 @@
             font-family: var(--font-mono);
             font-size: 13px;
             transition: color var(--transition-speed);
-            padding: 2px 4px;
+            padding: 6px 4px; /* 移动端触控优化：加大垂直点击区 */
         }
 
         .menu-btn:hover {
@@ -104,17 +107,16 @@
             text-underline-offset: 4px;
         }
 
-        /* 主体内容（直接、无卡片、纯粹的文本留白布局） */
         main {
             width: 100%;
             max-width: 680px;
             margin: auto 0;
-            padding: 40px 0;
+            padding: 60px 0;
         }
 
         h1 {
             font-family: var(--font-mono);
-            font-size: 36px;
+            font-size: 38px;
             font-weight: 700;
             margin-bottom: 24px;
             letter-spacing: -1px;
@@ -150,7 +152,7 @@
             overflow-x: auto;
             white-space: nowrap;
             width: 100%;
-            padding-right: 100px;
+            padding-right: 110px; /* 留出右侧 Copy 按钮位置，防止重叠 */
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
@@ -181,7 +183,7 @@
             right: 24px;
             top: 50%;
             transform: translateY(-50%);
-            padding: 4px 8px;
+            padding: 8px 12px; /* 触控范围优化 */
             border-radius: 3px;
             transition: all var(--transition-speed);
         }
@@ -189,6 +191,10 @@
         .copy-action:hover {
             color: var(--text-main);
             background-color: var(--border-color);
+        }
+
+        .copy-action:active {
+            transform: translateY(-50%) scale(0.95);
         }
 
         .copy-action.success {
@@ -219,6 +225,89 @@
 
         footer a:hover {
             border-bottom: 1px solid var(--text-main);
+        }
+
+        /* ==========================================
+           多设备自适应媒介查询 (Media Queries)
+           ========================================== */
+
+        /* 针对手机等小屏幕设备优化 (< 520px) */
+        @media (max-width: 520px) {
+            body {
+                padding: 24px 16px;
+            }
+
+            /* 顶栏响应式：从横排转为错落多行布局 */
+            header {
+                justify-content: space-between;
+                gap: 8px;
+                font-size: 12px;
+                padding-bottom: 16px;
+                border-bottom: 1px dashed var(--border-color);
+            }
+
+            .menu-item {
+                gap: 4px;
+            }
+
+            .menu-btn {
+                font-size: 12px;
+                padding: 8px 3px; /* 额外拓宽点击边界 */
+            }
+
+            /* 内容区域自适应紧凑化 */
+            main {
+                padding: 40px 0;
+            }
+
+            h1 {
+                font-size: 28px; /* 减小标题防止单行溢出 */
+                margin-bottom: 16px;
+            }
+
+            p {
+                font-size: 14px; /* 舒适阅读字号 */
+                line-height: 1.6;
+                margin-bottom: 24px;
+            }
+
+            /* 命令行自适应 */
+            .terminal-box {
+                padding: 16px;
+                font-size: 13.5px; /* 微调代码字体，确保命令展示完整 */
+            }
+
+            .terminal-content {
+                padding-right: 90px; /* 手机端微调右侧安全间距 */
+                gap: 8px;
+            }
+
+            .copy-action {
+                right: 16px;
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            /* 页脚自适应：居中垂直排版 */
+            footer {
+                flex-direction: column;
+                gap: 12px;
+                align-items: center;
+                text-align: center;
+                padding-top: 18px;
+            }
+        }
+
+        /* 针对超窄屏幕手机优化 (< 350px) */
+        @media (max-width: 350px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .terminal-box {
+                font-size: 12px;
+            }
         }
     </style>
 </head>
