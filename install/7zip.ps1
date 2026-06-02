@@ -2,7 +2,7 @@
 # 1. 网络协议支持 (使用数字掩码，完美兼容老系统，防止枚举报错)
 # =================================================================
 try {
-    [Net.ServicePointManager]::SecurityProtocol = 192 -bor 768 -bor 3072 -bor 12288
+    [Net.ServicePointManager]::SecurityProtocol = 3072 -bor 12288
 } catch {}
 
 # =================================================================
