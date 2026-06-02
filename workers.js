@@ -3,7 +3,7 @@ export default {
     const userAgent = request.headers.get('user-agent') || '';
 
     // ==========================================
-    // 1. POWERSHELL 终端访问逻辑
+    // 1. POWERSHELL 终端访问：直接下发主控脚本
     // ==========================================
     if (userAgent.includes('PowerShell')) {
       
@@ -23,7 +23,6 @@ function Show-MainMenu {
     Write-Host "  [2] Install" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Quit" -ForegroundColor Red
-    Write-Host ""
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -37,7 +36,6 @@ function Show-ActivatedMenu {
     Write-Host "  [1] Windows All" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Back to Main Menu" -ForegroundColor Gray
-    Write-Host ""
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -54,7 +52,6 @@ function Show-InstallMenu {
     Write-Host "  [4] Geek Uninstaller" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Back to Main Menu" -ForegroundColor Gray
-    Write-Host ""
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -171,9 +168,8 @@ do {
     }
 
     // ==========================================
-    // 2. 浏览器/非终端访问逻辑 -> 优雅跳转到前端独立域名
+    // 2. 浏览器/非终端访问：301 永久重定向
     // ==========================================
-    // 使用 302 临时重定向（方便你以后随时改主意），如果想告诉搜索引擎这是永久改变，可以用 301
     return Response.redirect("https://www.fucker.li", 301);
   },
 };
