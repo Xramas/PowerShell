@@ -25,6 +25,7 @@ function Show-MainMenu {
     Write-Host ""
     Write-Host "  [1] Activated" -ForegroundColor Yellow
     Write-Host "  [2] Install" -ForegroundColor Yellow
+    Write-Host "  [3] Function" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Quit" -ForegroundColor Red
     Write-Host "=============================================" -ForegroundColor Cyan
@@ -60,12 +61,25 @@ function Show-InstallMenu {
     Write-Host ""
 }
 
+function Show-FunctionMenu {
+    Clear-Host
+    Write-Host "=============================================" -ForegroundColor Cyan
+    Write-Host "             FUNCTION MENU                   " -ForegroundColor Cyan
+    Write-Host "=============================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  [1] Loger" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "  [0] Back to Main Menu" -ForegroundColor Gray
+    Write-Host "=============================================" -ForegroundColor Cyan
+    Write-Host ""
+}
+
 # 静态资源完全托管于 Cloudflare Pages 独立站点
-$baseUrl = "https://powershell.fucker.li/install"
+$baseUrl = "https://powershell.fucker.li"
 $mainExit = $false
 
 # =================================================================
-# 2. 优化后的远程执行函数：增强异常捕获与进程退出码检查
+# 2. 远程执行函数：增强异常捕获与进程退出码检查
 # =================================================================
 function Invoke-RemoteScript {
     param ([string]$url)
@@ -93,7 +107,7 @@ function Invoke-RemoteScript {
 # 主菜单循环
 do {
     Show-MainMenu
-    $mainChoice = Read-Host " >> Enter your choice [1-2, 0]"
+    $mainChoice = Read-Host " >> Enter your choice [1-3, 0]"
     Write-Host ""
 
     switch ($mainChoice) {
@@ -128,25 +142,47 @@ do {
                 switch ($subChoice) {
                     "1" {
                         Write-Host " >> Installing 7-Zip..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "$baseUrl/7zip.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/install/7zip.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "2" {
                         Write-Host " >> Installing V2Ray..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "$baseUrl/v2ray.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/install/v2ray.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "3" {
                         Write-Host " >> Installing VLC Media Player..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "$baseUrl/vlc.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/install/vlc.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "4" {
                         Write-Host " >> Launching Geek Uninstaller..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "$baseUrl/geek.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/install/geek.ps1"
+                        Write-Host ""
+                        Read-Host " >> Press Enter to continue..."
+                    }
+                    "0" { $subExit = $true }
+                    Default {
+                        Write-Host " !! Invalid choice." -ForegroundColor DarkYellow
+                        Start-Sleep -Seconds 1
+                    }
+                }
+            } while (!$subExit)
+            break
+        }
+        "3" {
+            $subExit = $false
+            do {
+                Show-FunctionMenu
+                $subChoice = Read-Host " >> Enter your choice [1, 0]"
+                Write-Host ""
+                switch ($subChoice) {
+                    "1" {
+                        Write-Host " >> Running Loger function..." -ForegroundColor Cyan
+                        Invoke-RemoteScript -url "$baseUrl/function/loger.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
@@ -188,7 +224,6 @@ do {
       return Response.redirect("https://www.fucker.li", 301);
     }
 
-    // 如果是 www.fucker.li 的浏览器访问，直接放行（让绑定的 Pages 静态站或 KV/前端环境正常响应）
     return fetch(request);
   },
 };
