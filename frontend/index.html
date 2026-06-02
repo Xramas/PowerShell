@@ -1,19 +1,48 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>fucker.li</title>
+    
+    <!-- 精确配置 SVG 与 PNG 图标 -->
+    <link rel="icon" type="image/svg+xml" href="https://github.githubassets.com/favicons/favicon.svg">
+    <link rel="alternate icon" type="image/png" href="https://github.githubassets.com/favicons/favicon.png">
+    
     <style>
+        /* 极致克制的色彩系统（回归经典开发文档与终端美学） */
         :root {
-            --bg-color: #0d1117;
-            --container-bg: #161b22;
-            --border-color: #30363d;
-            --text-main: #c9d1d9;
+            --bg-color: #ffffff;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --border-color: #e1e4e8;
+            --terminal-bg: #f6f8fa;
+            --terminal-text: #0366d6;
+            --accent-success: #22863a;
+            --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            --transition-speed: 0.15s;
+        }
+
+        html.theme-dark {
+            --bg-color: #0b0e14;
+            --text-main: #f0f6fc;
             --text-muted: #8b949e;
-            --accent-color: #58a6ff;
+            --border-color: #21262d;
+            --terminal-bg: #161b22;
+            --terminal-text: #58a6ff;
             --accent-success: #3fb950;
-            --code-bg: #0a0c10;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html:not(.theme-light):not(.theme-dark) {
+                --bg-color: #0b0e14;
+                --text-main: #f0f6fc;
+                --text-muted: #8b949e;
+                --border-color: #21262d;
+                --terminal-bg: #161b22;
+                --terminal-text: #58a6ff;
+                --accent-success: #3fb950;
+            }
         }
 
         * {
@@ -27,145 +56,369 @@
             color: var(--text-main);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            justify-content: space-between;
             align-items: center;
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
         }
 
-        .container {
-            background-color: var(--container-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 40px;
-            max-width: 600px;
+        /* 极简顶栏（文本链接形式的配置菜单） */
+        header {
             width: 100%;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            max-width: 680px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            font-size: 13px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            transition: color var(--transition-speed);
+            padding: 2px 4px;
+        }
+
+        .menu-btn:hover {
+            color: var(--text-main);
+        }
+
+        .menu-btn.active {
+            color: var(--terminal-text);
+            font-weight: bold;
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+
+        /* 主体内容（直接、无卡片、纯粹的文本留白布局） */
+        main {
+            width: 100%;
+            max-width: 680px;
+            margin: auto 0;
+            padding: 40px 0;
         }
 
         h1 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            color: #fff;
-            letter-spacing: -0.5px;
+            font-family: var(--font-mono);
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -1px;
+            color: var(--text-main);
         }
 
         p {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--text-muted);
-            margin-bottom: 30px;
-            line-height: 1.5;
+            margin-bottom: 32px;
+            line-height: 1.7;
         }
 
-        .code-box {
-            background-color: var(--code-bg);
+        /* 极客终端命令盒 */
+        .terminal-box {
+            background-color: var(--terminal-bg);
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 16px;
+            border-radius: 4px;
+            padding: 20px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-family: var(--font-mono);
+            font-size: 15px;
             position: relative;
+            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
         }
 
-        .code-text {
-            color: var(--accent-color);
-            overflow-x: auto;
-            white-space: nowrap;
-            text-align: left;
-            width: 100%;
-            padding-right: 40px;
-        }
-
-        .copy-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-muted);
-            transition: color 0.2s ease;
+        .terminal-content {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            width: 100%;
+            padding-right: 100px;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
 
-        .copy-btn:hover {
-            color: var(--accent-color);
+        .terminal-content::-webkit-scrollbar {
+            display: none;
         }
 
-        .copy-btn.success {
-            color: var(--accent-success);
-        }
-
-        .footer {
-            font-size: 12px;
+        .prompt-symbol {
             color: var(--text-muted);
+            user-select: none;
+        }
+
+        .command-string {
+            color: var(--terminal-text);
+            font-weight: 500;
+        }
+
+        /* 极简文本复制按钮 */
+        .copy-action {
+            background: none;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            color: var(--text-muted);
+            cursor: pointer;
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 4px 8px;
+            border-radius: 3px;
+            transition: all var(--transition-speed);
+        }
+
+        .copy-action:hover {
+            color: var(--text-main);
+            background-color: var(--border-color);
+        }
+
+        .copy-action.success {
+            color: var(--accent-success);
+            font-weight: bold;
+        }
+
+        /* 极简页脚 */
+        footer {
+            width: 100%;
+            max-width: 680px;
+            font-size: 12px;
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            text-align: left;
             border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            margin-top: 10px;
+            padding-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .footer a {
-            color: var(--accent-color);
+        footer a {
+            color: var(--text-main);
             text-decoration: none;
+            border-bottom: 1px dotted var(--text-muted);
         }
 
-        .footer a:hover {
-            text-decoration: underline;
+        footer a:hover {
+            border-bottom: 1px solid var(--text-main);
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- 极简菜单栏：纯文本操作 -->
+<header>
+    <div class="menu-item">
+        <span>lang:</span>
+        <button class="menu-btn" id="lang-zh" onclick="setLanguage('zh')">zh</button>
+        <span style="user-select:none;color:var(--border-color)">|</span>
+        <button class="menu-btn" id="lang-en" onclick="setLanguage('en')">en</button>
+    </div>
+    <div class="menu-item">
+        <span>theme:</span>
+        <button class="menu-btn" id="theme-system" onclick="setTheme('system')">system</button>
+        <span style="user-select:none;color:var(--border-color)">·</span>
+        <button class="menu-btn" id="theme-light" onclick="setTheme('light')">light</button>
+        <span style="user-select:none;color:var(--border-color)">·</span>
+        <button class="menu-btn" id="theme-dark" onclick="setTheme('dark')">dark</button>
+    </div>
+</header>
+
+<!-- 主页面 -->
+<main>
     <h1>fucker.li</h1>
-    <p>轻量级 Windows 自动化运维与环境配置脚本。请复制下方单行命令，并在系统的 PowerShell 终端中粘贴回车运行：</p>
+    <p id="descText">轻量级 Windows 自动化运维与环境配置脚本。请复制下方单行命令，并在系统的 PowerShell 终端中粘贴回车运行：</p>
     
-    <div class="code-box">
-        <div class="code-text" id="commandText">irm fucker.li | iex</div>
-        <button class="copy-btn" id="copyBtn" title="复制到剪贴板">
-            <svg id="copyIcon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path><path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path></svg>
-            <svg id="successIcon" style="display:none;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg>
+    <div class="terminal-box">
+        <div class="terminal-content">
+            <span class="prompt-symbol">$</span>
+            <span class="command-string" id="commandText">irm fucker.li | iex</span>
+        </div>
+        <button class="copy-action" id="copyBtn">
+            [ copy ]
         </button>
     </div>
+</main>
 
-    <div class="footer">
+<!-- 页脚 -->
+<footer>
+    <div id="footerText">
         Powered by <a href="https://fucker.li" target="_blank">fucker.li</a> & Cloudflare Eco
     </div>
-</div>
+    <div>
+        v1.2.0
+    </div>
+</footer>
 
 <script>
+    // ==========================================
+    // 多语言配置
+    // ==========================================
+    const translations = {
+        zh: {
+            desc: "轻量级 Windows 自动化运维与环境配置脚本。请复制下方单行命令，并在系统的 PowerShell 终端中粘贴回车运行：",
+            footer: '由 <a href="https://fucker.li" target="_blank">fucker.li</a> & Cloudflare 生态强力驱动',
+            copyBtnText: "[ copy ]",
+            copySuccess: "[ copied! ]",
+            copyFail: "[ failed ]"
+        },
+        en: {
+            desc: "A lightweight Windows automation & environment provisioning script. Copy the single-line command below, paste it into your PowerShell terminal, and press Enter to run:",
+            footer: 'Powered by <a href="https://fucker.li" target="_blank">fucker.li</a> & Cloudflare Eco',
+            copyBtnText: "[ copy ]",
+            copySuccess: "[ copied! ]",
+            copyFail: "[ failed ]"
+        }
+    };
+
+    let currentLanguage = 'en';
+
+    function initLanguage() {
+        const savedLang = localStorage.getItem('fucker-lang');
+        if (savedLang === 'zh' || savedLang === 'en') {
+            setLanguage(savedLang);
+        } else {
+            const browserLang = navigator.language || navigator.userLanguage;
+            if (browserLang && browserLang.toLowerCase().includes('zh')) {
+                setLanguage('zh');
+            } else {
+                setLanguage('en');
+            }
+        }
+    }
+
+    function setLanguage(lang) {
+        currentLanguage = lang;
+        localStorage.setItem('fucker-lang', lang);
+
+        document.getElementById('descText').innerHTML = translations[lang].desc;
+        document.getElementById('footerText').innerHTML = translations[lang].footer;
+        
+        // 仅在未处于成功/失败状态时重置按钮文字
+        const copyBtn = document.getElementById('copyBtn');
+        if (!copyBtn.classList.contains('success') && !copyBtn.classList.contains('failed')) {
+            copyBtn.innerText = translations[lang].copyBtnText;
+        }
+
+        document.getElementById('lang-zh').classList.toggle('active', lang === 'zh');
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+        document.documentElement.setAttribute('lang', lang === 'zh' ? 'zh-CN' : 'en');
+    }
+
+    // ==========================================
+    // 极简主题控制
+    // ==========================================
+    function setTheme(mode) {
+        const root = document.documentElement;
+        root.classList.remove('theme-light', 'theme-dark');
+
+        if (mode === 'dark') {
+            root.classList.add('theme-dark');
+        } else if (mode === 'light') {
+            root.classList.add('theme-light');
+        }
+
+        localStorage.setItem('fucker-theme', mode);
+
+        document.getElementById('theme-light').classList.toggle('active', mode === 'light');
+        document.getElementById('theme-system').classList.toggle('active', mode === 'system');
+        document.getElementById('theme-dark').classList.toggle('active', mode === 'dark');
+    }
+
+    function initTheme() {
+        const savedTheme = localStorage.getItem('fucker-theme') || 'system';
+        setTheme(savedTheme);
+    }
+
+    // ==========================================
+    // 容错复制逻辑与终端状态反馈（取代 Toast）
+    // ==========================================
+    function executeCopy(text) {
+        return new Promise((resolve, reject) => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text)
+                    .then(resolve)
+                    .catch(() => fallbackCopy(text, resolve, reject));
+            } else {
+                fallbackCopy(text, resolve, reject);
+            }
+        });
+    }
+
+    function fallbackCopy(text, resolve, reject) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                resolve();
+            } else {
+                reject(new Error("fallback unsuccessful"));
+            }
+        } catch (err) {
+            reject(err);
+        } finally {
+            document.body.removeChild(textArea);
+        }
+    }
+
     document.getElementById('copyBtn').addEventListener('click', async () => {
         const commandText = document.getElementById('commandText').innerText;
         const copyBtn = document.getElementById('copyBtn');
-        const copyIcon = document.getElementById('copyIcon');
-        const successIcon = document.getElementById('successIcon');
 
         try {
-            await navigator.clipboard.writeText(commandText);
+            await executeCopy(commandText);
             
+            // 终端风格的成功状态反馈
             copyBtn.classList.add('success');
-            copyIcon.style.display = 'none';
-            successIcon.style.display = 'inline-block';
+            copyBtn.innerText = translations[currentLanguage].copySuccess;
 
             setTimeout(() => {
                 copyBtn.classList.remove('success');
-                copyIcon.style.display = 'inline-block';
-                successIcon.style.display = 'none';
+                copyBtn.innerText = translations[currentLanguage].copyBtnText;
             }, 2000);
         } catch (err) {
-            console.error('无法复制文本: ', err);
-            alert('复制失败，请手动选择命令复制。');
+            console.error('Copy failed: ', err);
+            copyBtn.classList.add('failed');
+            copyBtn.innerText = translations[currentLanguage].copyFail;
+
+            setTimeout(() => {
+                copyBtn.classList.remove('failed');
+                copyBtn.innerText = translations[currentLanguage].copyBtnText;
+            }, 2000);
         }
     });
+
+    window.onload = function() {
+        initLanguage();
+        initTheme();
+    };
 </script>
 </body>
 </html>
