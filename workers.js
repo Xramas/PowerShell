@@ -7,8 +7,6 @@ export default {
     // ==========================================
     if (userAgent.includes('PowerShell')) {
       
-      // 注意：下面所有的 $baseUrl、$mainExit 等内部变量，我都加上了 \ 进行转义
-      // 防止被 JavaScript 错误地当成 JS 变量吞掉
       const psScript = `
 # 安全兼容性初始化：强制开启全版本 TLS
 try {
@@ -119,26 +117,25 @@ do {
                 switch (\$subChoice) {
                     "1" {
                         Write-Host " >> Installing 7-Zip..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "(\$baseUrl/7zip.ps1)"
+                        Invoke-RemoteScript -url "\$baseUrl/7zip.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "2" {
                         Write-Host " >> Installing V2Ray..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "(\$baseUrl/v2ray.ps1)"
+                        Invoke-RemoteScript -url "\$baseUrl/v2ray.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "3" {
                         Write-Host " >> Installing VLC Media Player..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "(\$baseUrl/vlc.ps1)"
+                        Invoke-RemoteScript -url "\$baseUrl/vlc.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "4" {
                         Write-Host " >> Launching Geek Uninstaller..." -ForegroundColor Cyan
-                        # 🌟 修复关键点：通过 JS 转义确保 \$baseUrl 正确下发给终端
-                        Invoke-RemoteScript -url "(\$baseUrl/geek.ps1)"
+                        Invoke-RemoteScript -url "\$baseUrl/geek.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
@@ -174,125 +171,9 @@ do {
     }
 
     // ==========================================
-    // 2. 浏览器访问逻辑 (优雅极简网页)
+    // 2. 浏览器/非终端访问逻辑 -> 优雅跳转到前端独立域名
     // ==========================================
-    const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ethan's Toolbox</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
-            background-color: #0d1117;
-            color: #c9d1d9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            padding: 0 20px;
-        }
-        .container {
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-            background: #161b22;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid #30363d;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-        }
-        h1 {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #f0f6fc;
-            letter-spacing: -0.5px;
-        }
-        p {
-            font-size: 14px;
-            color: #8b949e;
-            margin-bottom: 28px;
-        }
-        .code-box {
-            background-color: #010409;
-            border: 1px solid #30363d;
-            padding: 14px 16px;
-            border-radius: 6px;
-            font-family: ui-monospace, SFMono-Regular, SF Pro Text, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-            font-size: 13px;
-            color: #79c0ff;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            text-align: left;
-        }
-        .code-text {
-            word-break: break-all;
-            user-select: all;
-        }
-        .copy-btn {
-            background: #21262d;
-            border: 1px solid #f0f6fc1f;
-            color: #c9d1d9;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.3, 0, 0.5, 1);
-            margin-left: 12px;
-            white-space: nowrap;
-        }
-        .copy-btn:hover {
-            background: #30363d;
-            border-color: #8b949e;
-        }
-        .copy-btn.copied {
-            background: #238636;
-            color: #ffffff;
-            border-color: #2ea44f;
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <h1>Ethan's Toolbox</h1>
-    <p>Run this command in Windows PowerShell to launch the utility.</p>
-    
-    <div class="code-box">
-        <span class="code-text" id="cmdText">irm powershell.fucker.li | iex</span>
-        <button class="copy-btn" id="copyBtn" onclick="copyCommand()">Copy</button>
-    </div>
-</div>
-
-<script>
-function copyCommand() {
-    const text = document.getElementById('cmdText').innerText;
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copyBtn');
-        btn.innerText = 'Copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-            btn.innerText = 'Copy';
-            btn.classList.remove('copied');
-        }, 2000);
-    });
-}
-</script>
-
-</body>
-</html>
-    `;
-
-    return new Response(htmlContent, {
-      headers: { 'content-type': 'text/html; charset=utf-8' },
-      status: 200
-    });
+    // 使用 302 临时重定向（方便你以后随时改主意），如果想告诉搜索引擎这是永久改变，可以用 301
+    return Response.redirect("https://www.fucker.li", 301);
   },
 };
