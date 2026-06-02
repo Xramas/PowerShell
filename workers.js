@@ -16,7 +16,7 @@ try {
 function Show-MainMenu {
     Clear-Host
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "             ETHAN'S TOOLBOX                 " -ForegroundColor Cyan
+    Write-Host "                 fucker.li                   " -ForegroundColor Cyan
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  [1] Activated" -ForegroundColor Yellow
@@ -56,98 +56,99 @@ function Show-InstallMenu {
     Write-Host ""
 }
 
-\$baseUrl = "https://powershell.fucker.li/install"
-\$mainExit = \$false
+$baseUrl = "https://powershell.fucker.li/install"
+$mainExit = $false
 
-# 统一下载与执行函数（包含策略拦截自动绕过）
+# 统一下载与执行函数：对 PowerShell 代码进行编码运行
 function Invoke-RemoteScript {
-    param ([string]\$url)
+    param ([string]$url)
     try {
-        # 优先尝试标准直接执行
-        irm \$url | iex
+        # 获取远程脚本纯文本内容
+        $scriptContent = irm $url -UseBasicParsing
+        
+        # 将代码转换为 Unicode 字节数组并进行 Base64 编码
+        $bytes = [System.Text.Encoding]::Unicode.GetBytes($scriptContent)
+        $encoded = [Convert]::ToBase64String($bytes)
+        
+        # 启动新进程执行编码后的命令（完美绕过执行策略与基本拦截）
+        $proc = Start-Process "powershell" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encoded" -PassThru -Wait -NoNewWindow
     } catch {
-        try {
-            # 如果被拦截，强制在内存中创建 ScriptBlock 绕过执行策略
-            \$script = irm \$url
-            Invoke-Command -ScriptBlock ([scriptblock]::Create(\$script))
-        } catch {
-            Write-Host " !! Execution failed. Please check your network or execution policy." -ForegroundColor Red
-        }
+        Write-Host " !! Execution failed. Please check your network or URL." -ForegroundColor Red
     }
 }
 
 # 主菜单循环
 do {
     Show-MainMenu
-    \$mainChoice = Read-Host " >> Enter your choice [1-2, 0]"
+    $mainChoice = Read-Host " >> Enter your choice [1-2, 0]"
     Write-Host ""
 
-    switch (\$mainChoice) {
+    switch ($mainChoice) {
         "1" {
-            \$subExit = \$false
+            $subExit = $false
             do {
                 Show-ActivatedMenu
-                \$subChoice = Read-Host " >> Enter your choice [1, 0]"
+                $subChoice = Read-Host " >> Enter your choice [1, 0]"
                 Write-Host ""
-                switch (\$subChoice) {
+                switch ($subChoice) {
                     "1" {
                         Write-Host " >> Loading activation script..." -ForegroundColor Cyan
                         Invoke-RemoteScript -url "https://get.activated.win"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
-                    "0" { \$subExit = \$true }
+                    "0" { $subExit = $true }
                     Default {
                         Write-Host " !! Invalid choice." -ForegroundColor DarkYellow
                         Start-Sleep -Seconds 1
                     }
                 }
-            } while (!\$subExit)
+            } while (!$subExit)
             break
         }
         "2" {
-            \$subExit = \$false
+            $subExit = $false
             do {
                 Show-InstallMenu
-                \$subChoice = Read-Host " >> Enter your choice [1-4, 0]"
+                $subChoice = Read-Host " >> Enter your choice [1-4, 0]"
                 Write-Host ""
-                switch (\$subChoice) {
+                switch ($subChoice) {
                     "1" {
                         Write-Host " >> Installing 7-Zip..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "\$baseUrl/7zip.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/7zip.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "2" {
                         Write-Host " >> Installing V2Ray..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "\$baseUrl/v2ray.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/v2ray.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "3" {
                         Write-Host " >> Installing VLC Media Player..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "\$baseUrl/vlc.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/vlc.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
                     "4" {
                         Write-Host " >> Launching Geek Uninstaller..." -ForegroundColor Cyan
-                        Invoke-RemoteScript -url "\$baseUrl/geek.ps1"
+                        Invoke-RemoteScript -url "$baseUrl/geek.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
-                    "0" { \$subExit = \$true }
+                    "0" { $subExit = $true }
                     Default {
                         Write-Host " !! Invalid choice." -ForegroundColor DarkYellow
                         Start-Sleep -Seconds 1
                     }
                 }
-            } while (!\$subExit)
+            } while (!$subExit)
             break
         }
         "0" {
             Write-Host " >> Goodbye." -ForegroundColor Gray
-            \$mainExit = \$true
+            $mainExit = $true
             break
         }
         Default {
@@ -156,7 +157,7 @@ do {
         }
     }
 
-} while (!\$mainExit)
+} while (!$mainExit)
       `;
 
       return new Response(psScript, {
