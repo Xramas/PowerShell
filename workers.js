@@ -35,7 +35,7 @@ function Show-MainMenu {
 function Show-ActivatedMenu {
     Clear-Host
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "             ACTIVATED MENU                  " -ForegroundColor Cyan
+    Write-Host "              ACTIVATED MENU                  " -ForegroundColor Cyan
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  [1] Windows All" -ForegroundColor Yellow
@@ -48,7 +48,7 @@ function Show-ActivatedMenu {
 function Show-InstallMenu {
     Clear-Host
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "              INSTALL MENU                   " -ForegroundColor Cyan
+    Write-Host "               INSTALL MENU                  " -ForegroundColor Cyan
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  [1] 7-Zip" -ForegroundColor Yellow
@@ -64,10 +64,11 @@ function Show-InstallMenu {
 function Show-FunctionMenu {
     Clear-Host
     Write-Host "=============================================" -ForegroundColor Cyan
-    Write-Host "             FUNCTION MENU                   " -ForegroundColor Cyan
+    Write-Host "               FUNCTION MENU                 " -ForegroundColor Cyan
     Write-Host "=============================================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "  [1] Loger" -ForegroundColor Yellow
+    Write-Host "  [2] Loger Agent" -ForegroundColor Yellow
     Write-Host ""
     Write-Host "  [0] Back to Main Menu" -ForegroundColor Gray
     Write-Host "=============================================" -ForegroundColor Cyan
@@ -177,12 +178,18 @@ do {
             $subExit = $false
             do {
                 Show-FunctionMenu
-                $subChoice = Read-Host " >> Enter your choice [1, 0]"
+                $subChoice = Read-Host " >> Enter your choice [1-2, 0]"
                 Write-Host ""
                 switch ($subChoice) {
                     "1" {
                         Write-Host " >> Running Loger function..." -ForegroundColor Cyan
                         Invoke-RemoteScript -url "$baseUrl/function/loger.ps1"
+                        Write-Host ""
+                        Read-Host " >> Press Enter to continue..."
+                    }
+                    "2" {
+                        Write-Host " >> Running Loger Agent function..." -ForegroundColor Cyan
+                        Invoke-RemoteScript -url "$baseUrl/function/loger-agent.ps1"
                         Write-Host ""
                         Read-Host " >> Press Enter to continue..."
                     }
