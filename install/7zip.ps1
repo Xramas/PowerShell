@@ -1,10 +1,9 @@
 # =================================================================
-# 1. 网络协议支持：使用位运算符 (-bor) 启用所有 TLS 协议
+# 1. 网络协议支持 (使用数字掩码，完美兼容老系统，防止枚举报错)
 # =================================================================
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor 
-                                              [Net.SecurityProtocolType]::Tls11 -bor 
-                                              [Net.SecurityProtocolType]::Tls12 -bor 
-                                              [Net.SecurityProtocolType]::Tls13
+try {
+    [Net.ServicePointManager]::SecurityProtocol = 192 -bor 768 -bor 3072 -bor 12288
+} catch {}
 
 # =================================================================
 # 2. 动态获取 GitHub 上 7-Zip 的最新版本号
@@ -20,7 +19,6 @@ try {
     
     Write-Host "Latest version found: $latestVersion" -ForegroundColor Green
 } catch {
-    # 如果解析 API 失败，使用保底版本，防止脚本崩溃
     Write-Host "Warning: Failed to fetch version from GitHub API. Falling back to v26.01." -ForegroundColor Yellow
     $latestVersion = "26.01"
     $versionClean = "2601"
@@ -48,7 +46,6 @@ try {
         Write-Host "Location: International. Using GitHub source directly." -ForegroundColor Green
     }
 } catch {
-    # IP 检测失败时的保底策略：走国内镜像加速
     Write-Host "Warning: IP detection timeout or failed. Defaulting to NJU mirror for stability." -ForegroundColor Yellow
     $downloadUrl = $mirrorUrl
 }
@@ -79,9 +76,6 @@ try {
 } catch {
     Write-Error "Error: An error occurred during installation. Details: $_"
 } finally {
-    # =================================================================
-    # 7. 清理临时文件
-    # =================================================================
     if (Test-Path $installerPath) {
         Remove-Item $installerPath -Force
         Write-Host "Temporary installer cleared." -ForegroundColor Gray
