@@ -1,12 +1,16 @@
 export default {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    const host = url.hostname.toLowerCase();
     const userAgent = request.headers.get('user-agent') || '';
 
     // ==========================================
-    // 1. POWERSHELL 终端访问：直接下发主控脚本
+    // 1. User-Agent 精准分流 (仅区分 PowerShell 和 浏览器)
     // ==========================================
-    if (userAgent.includes('PowerShell')) {
-      
+    const isPowerShell = userAgent.includes('PowerShell') || userAgent.includes('pwsh');
+
+    if (isPowerShell) {
+      // 主控脚本主体
       const psScript = `
 # 安全兼容性初始化：强制开启全版本 TLS
 try {
@@ -56,10 +60,13 @@ function Show-InstallMenu {
     Write-Host ""
 }
 
+# 静态资源完全托管于 Cloudflare Pages 独立站点
 $baseUrl = "https://powershell.fucker.li/install"
 $mainExit = $false
 
-# 统一下载与执行函数：对 PowerShell 代码进行编码运行
+# =================================================================
+# 2. 优化后的远程执行函数：增强异常捕获与进程退出码检查
+# =================================================================
 function Invoke-RemoteScript {
     param ([string]$url)
     try {
@@ -70,10 +77,16 @@ function Invoke-RemoteScript {
         $bytes = [System.Text.Encoding]::Unicode.GetBytes($scriptContent)
         $encoded = [Convert]::ToBase64String($bytes)
         
-        # 启动新进程执行编码后的命令（完美绕过执行策略与基本拦截）
+        # 启动新进程执行编码后的命令，并捕获进程对象以监控运行状态
         $proc = Start-Process "powershell" -ArgumentList "-NoProfile -ExecutionPolicy Bypass -EncodedCommand $encoded" -PassThru -Wait -NoNewWindow
+        
+        # 检查子脚本进程的退出码 (ExitCode)
+        if ($null -ne $proc -and $proc.ExitCode -ne 0) {
+            Write-Host " !! Script executed but returned a non-zero exit code: $($proc.ExitCode)" -ForegroundColor DarkYellow
+        }
     } catch {
-        Write-Host " !! Execution failed. Please check your network or URL." -ForegroundColor Red
+        Write-Host " !! Execution failed. Unable to fetch or run the remote script." -ForegroundColor Red
+        Write-Host " !! Error Details: $_" -ForegroundColor DarkRed
     }
 }
 
@@ -169,8 +182,13 @@ do {
     }
 
     // ==========================================
-    // 2. 浏览器/非终端访问：301 永久重定向
+    // 3. 浏览器访问非 www 域名时，进行 301 重定向
     // ==========================================
-    return Response.redirect("https://www.fucker.li", 301);
+    if (host === 'fucker.li') {
+      return Response.redirect("https://www.fucker.li", 301);
+    }
+
+    // 如果是 www.fucker.li 的浏览器访问，直接放行（让绑定的 Pages 静态站或 KV/前端环境正常响应）
+    return fetch(request);
   },
 };
