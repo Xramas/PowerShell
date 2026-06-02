@@ -1,10 +1,9 @@
 # =================================================================
-# 1. 网络协议支持
+# 1. 网络协议支持 (使用数字掩码，完美兼容老系统，防止枚举报错)
 # =================================================================
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor 
-                                              [Net.SecurityProtocolType]::Tls11 -bor 
-                                              [Net.SecurityProtocolType]::Tls12 -bor 
-                                              [Net.SecurityProtocolType]::Tls13
+try {
+    [Net.ServicePointManager]::SecurityProtocol = 192 -bor 768 -bor 3072 -bor 12288
+} catch {}
 
 # =================================================================
 # 2. 动态获取 VLC 最新版本号 (解析官方文本流)
@@ -12,11 +11,9 @@
 Write-Host "Checking VideoLAN for the latest VLC version..." -ForegroundColor Cyan
 
 try {
-    # 请求官方专门提供给检测更新的版本文本接口（只返回一个纯文本版本号，如 3.0.23）
     $vlcVersionUrl = "https://update.videolan.org/vlc/status-win-x64"
     $versionRaw = Invoke-RestMethod -Uri $vlcVersionUrl -UserAgent "Mozilla/5.0" -TimeoutSec 5
     
-    # 提取第一行或匹配数字版本号
     if ($versionRaw -match '(\d+\.\d+\.\d+)') {
         $latestVersion = $Matches[1]
         Write-Host "Latest VLC version found: $latestVersion" -ForegroundColor Green
@@ -24,13 +21,12 @@ try {
         throw "Could not parse version string."
     }
 } catch {
-    # 保底机制，防止接口挂掉导致脚本罢工
     Write-Host "Warning: Failed to fetch online version. Falling back to v3.0.23." -ForegroundColor Yellow
     $latestVersion = "3.0.23"
 }
 
 # =================================================================
-# 3. 动态拼接你提供的“实体文件”真实链接
+# 3. 动态拼接实体文件链接
 # =================================================================
 $officialUrl   = "https://get.videolan.org/vlc/last/win64/vlc-$latestVersion-win64.exe"
 $mirrorUrl     = "https://mirror.nju.edu.cn/videolan-ftp/vlc/last/win64/vlc-$latestVersion-win64.exe"
@@ -81,9 +77,6 @@ try {
 } catch {
     Write-Error "Error: An error occurred during installation. Details: $_"
 } finally {
-    # =================================================================
-    # 7. 清理临时文件
-    # =================================================================
     if (Test-Path $installerPath) {
         Remove-Item $installerPath -Force
         Write-Host "Temporary installer cleared." -ForegroundColor Gray
