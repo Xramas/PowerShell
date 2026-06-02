@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ethan's Toolbox</title>
+    <title>fucker.li</title>
     <style>
         :root {
             --bg-color: #0d1117;
@@ -126,7 +126,7 @@
 <body>
 
 <div class="container">
-    <h1>Ethan's Toolbox</h1>
+    <h1>fucker.li</h1>
     <p>轻量级 Windows 自动化运维与环境配置脚本。请复制下方单行命令，并在系统的 PowerShell 终端中粘贴回车运行：</p>
     
     <div class="code-box">
@@ -152,12 +152,10 @@
         try {
             await navigator.clipboard.writeText(commandText);
             
-            // 切换状态外观
             copyBtn.classList.add('success');
             copyIcon.style.display = 'none';
             successIcon.style.display = 'inline-block';
 
-            // 2 秒后恢复原状
             setTimeout(() => {
                 copyBtn.classList.remove('success');
                 copyIcon.style.display = 'inline-block';
