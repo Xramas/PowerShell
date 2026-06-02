@@ -1,10 +1,9 @@
 # =================================================================
-# 1. 网络协议支持
+# 1. 网络协议支持 (使用数字掩码，完美兼容老系统，防止枚举报错)
 # =================================================================
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls -bor 
-                                              [Net.SecurityProtocolType]::Tls11 -bor 
-                                              [Net.SecurityProtocolType]::Tls12 -bor 
-                                              [Net.SecurityProtocolType]::Tls13
+try {
+    [Net.ServicePointManager]::SecurityProtocol = 192 -bor 768 -bor 3072 -bor 12288
+} catch {}
 
 # =================================================================
 # 2. 动态获取 v2ray-core 最新版本号
@@ -44,20 +43,17 @@ $downloadUrl = $null
 
 foreach ($url in $sourceUrls) {
     try {
-        # 使用 -Method Head 只握手不下载，设置 2 秒极其严苛的超时
         $response = Invoke-WebRequest -Uri $url -Method Head -TimeoutSec 2 -UseBasicParsing -ErrorAction Stop
         if ($response.StatusCode -eq 200) {
             $downloadUrl = $url
             Write-Host "Selected fastest source: $downloadUrl" -ForegroundColor Green
-            break # 只要找到第一个能通且速度快的，立刻跳出循环开始下载
+            break 
         }
     } catch {
-        # 当前源超时或无法访问，继续测试下一个
         continue
     }
 }
 
-# 如果全部测速都失败，强制使用官方直连作为最后保底
 if ($null -eq $downloadUrl) {
     Write-Host "Warning: All proxies timed out. Falling back to official GitHub URL." -ForegroundColor Yellow
     $downloadUrl = $sourceUrls[0]
@@ -80,26 +76,18 @@ try {
 # =================================================================
 # 6. 解压到用户特定的 AppData 目录
 # =================================================================
-# 动态拼接目标路径：C:\Users\<Username>\AppData\Local\v2ray
 $targetDir = Join-Path $env:LOCALAPPDATA "v2ray"
-
 Write-Host "Deploying portable binaries to: $targetDir" -ForegroundColor Cyan
 
 try {
-    # 如果目标目录不存在，则创建
     if (-not (Test-Path $targetDir)) {
         New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
     }
-    
-    # 使用 PowerShell 原生命令解压（-Force 参数确保覆盖旧版本文件）
     Expand-Archive -Path $zipPath -DestinationPath $targetDir -Force
     Write-Host "v2ray has been successfully deployed and updated!" -ForegroundColor Green
 } catch {
     Write-Error "Error: Extraction failed. Details: $_"
 } finally {
-    # =================================================================
-    # 7. 清理临时压缩包
-    # =================================================================
     if (Test-Path $zipPath) {
         Remove-Item $zipPath -Force
         Write-Host "Temporary zip package cleared." -ForegroundColor Gray
