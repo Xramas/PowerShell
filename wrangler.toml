@@ -1,0 +1,10 @@
+name = "fucker.li" # 你的 Worker 名称
+main = "workers.js"
+compatibility_date = "2026-05-26"    # 保持现代的兼容日期
+
+[compatibility_flags]
+
+# 核心路由绑定
+[[routes]]
+pattern = "fucker.li"
+custom_domain = true
