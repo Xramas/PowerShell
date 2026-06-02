@@ -1,7 +1,7 @@
 [Net.ServicePointManager]::ServerCertificateValidationCallback = {$true}
 
 try {
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor 12288
+    [Net.ServicePointManager]::SecurityProtocol = 3072 -bor 12288
 } catch {
     Write-Warning "Could not configure security protocols. Using system defaults."
 }
