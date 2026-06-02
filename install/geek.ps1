@@ -6,7 +6,7 @@ try {
 } catch {}
 
 # =================================================================
-# 2. 构建候选下载链接（官方直链 + 预留自建通用代理接口）
+# 2. 构建候选下载链接
 # =================================================================
 $sourceUrls = @(
     "https://geekuninstaller.com/geek.zip"
@@ -77,7 +77,6 @@ $expectedExePath = Join-Path $targetDir "Geek.exe"
 $oldExePath      = Join-Path $targetDir "geek.exe"
 
 if (Test-Path $expectedExePath) {
-    # 获取文件系统中的实际文件名（严格区分大小写）
     $actualName = (Get-Item $expectedExePath).Name
     
     if ($actualName -eq "geek.exe") {
@@ -96,7 +95,7 @@ if (Test-Path $expectedExePath) {
 }
 
 # =================================================================
-# 7. 创建桌面快捷方式 (显式指定图标路径，解决空白图标问题)
+# 7. 创建桌面快捷方式
 # =================================================================
 Write-Host "Creating desktop shortcut with icon alignment..." -ForegroundColor Cyan
 try {
@@ -106,12 +105,9 @@ try {
     $wshShell = New-Object -ComObject WScript.Shell
     $shortcut = $wshShell.CreateShortcut($shortcutPath)
     
-    # 🌟 修复点：将未定义的 $newExePath 统一替换为上面定义好的 $expectedExePath
     $shortcut.TargetPath = $expectedExePath
     $shortcut.WorkingDirectory = $targetDir
     $shortcut.Description = "Geek Uninstaller - Portable Software Remover"
-    
-    # 🌟 修复点：强制指定正确的图标路径变量
     $shortcut.IconLocation = "$expectedExePath, 0"
     
     $shortcut.Save()
