@@ -1,4 +1,4 @@
-name = "fucker.li" # 你的 Worker 名称
+name = "fucker" # 你的 Worker 名称
 main = "workers.js"
 compatibility_date = "2026-05-26"    # 保持现代的兼容日期
 
